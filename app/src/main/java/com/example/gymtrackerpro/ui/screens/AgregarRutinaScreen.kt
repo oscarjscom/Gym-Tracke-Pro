@@ -1,5 +1,6 @@
 package com.example.gymtrackerpro.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,13 +10,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,13 +27,16 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,8 +45,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.gymtrackerpro.data.database.AppDatabase
 import com.example.gymtrackerpro.data.model.Rutina
@@ -57,8 +67,8 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
     val rutinaDao = db.rutinaDao()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-
     val gruposMusculares = listOf("Pecho", "Espalda", "Pierna", "Hombro", "Brazo", "Abdomen", "Glúteo")
+
     var ejercicio by remember { mutableStateOf("") }
     var grupoMuscular by remember { mutableStateOf("") }
     var series by remember { mutableStateOf("") }
@@ -67,6 +77,7 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
     var fecha by remember {
         mutableStateOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
     }
+
     var expandedDropdown by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
@@ -74,6 +85,7 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
+            colors = DatePickerDefaults.colors(containerColor = Color(0xFF1C1C1E)),
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
@@ -83,13 +95,25 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
                         fecha = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text("OK", color = MaterialTheme.colorScheme.primary) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar", color = Color.Gray) }
             }
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    titleContentColor = Color.White,
+                    headlineContentColor = Color.White,
+                    weekdayContentColor = Color.Gray,
+                    dayContentColor = Color.White,
+                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedDayContentColor = Color.White,
+                    todayContentColor = MaterialTheme.colorScheme.primary,
+                    todayDateBorderColor = MaterialTheme.colorScheme.primary
+                )
+            )
         }
     }
 
@@ -115,20 +139,22 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
     }
 
     Scaffold(
+        containerColor = Color(0xFF0D0D0D),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Nueva rutina") },
+                title = { Text("Nueva rutina", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White)
                     }
                 },
                 actions = {
                     IconButton(onClick = { guardar() }) {
-                        Icon(Icons.Default.Save, contentDescription = null)
+                        Icon(Icons.Default.Save, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
             )
         }
     ) { padding ->
@@ -138,18 +164,22 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
                 .padding(padding)
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Spacer(Modifier.height(8.dp))
-            Text("Ejercicio")
+
+            LabelField("Ejercicio")
             OutlinedTextField(
                 value = ejercicio,
                 onValueChange = { ejercicio = it },
-                placeholder = { Text("Press banca") },
+                placeholder = { Text("Ej: Press de Banca", color = Color.Gray) },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = customTextFieldColors()
             )
-            Text("Grupo muscular")
+
+            LabelField("Grupo muscular")
             ExposedDropdownMenuBox(
                 expanded = expandedDropdown,
                 onExpandedChange = { expandedDropdown = it }
@@ -158,21 +188,24 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
                     value = grupoMuscular,
                     onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text("Seleccionar") },
+                    placeholder = { Text("Seleccionar", color = Color.Gray) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+                        .menuAnchor(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = customTextFieldColors()
                 )
                 ExposedDropdownMenu(
                     expanded = expandedDropdown,
-                    onDismissRequest = { expandedDropdown = false }
+                    onDismissRequest = { expandedDropdown = false },
+                    modifier = Modifier.background(Color(0xFF1C1C1E))
                 ) {
                     gruposMusculares.forEach { grupo ->
                         DropdownMenuItem(
-                            text = { Text(grupo) },
+                            text = { Text(grupo, color = Color.White) },
                             onClick = {
                                 grupoMuscular = grupo
                                 expandedDropdown = false
@@ -181,60 +214,79 @@ fun AgregarRutinaScreen(navController: NavController, usuarioId: Int) {
                     }
                 }
             }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Series")
+                    LabelField("Series")
                     OutlinedTextField(
                         value = series,
                         onValueChange = { series = it },
-                        placeholder = { Text("4") },
+                        placeholder = { Text("4", color = Color.Gray) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = customTextFieldColors()
                     )
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Repeticiones")
+                    LabelField("Repeticiones")
                     OutlinedTextField(
                         value = repeticiones,
                         onValueChange = { repeticiones = it },
-                        placeholder = { Text("12") },
+                        placeholder = { Text("12", color = Color.Gray) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = customTextFieldColors()
                     )
                 }
             }
-            Text("Peso (kg)")
+
+            LabelField("Peso (kg)")
             OutlinedTextField(
                 value = pesoKg,
                 onValueChange = { pesoKg = it },
-                placeholder = { Text("60.5") },
+                placeholder = { Text("60.5", color = Color.Gray) },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = customTextFieldColors()
             )
-            Text("Fecha")
+
+            LabelField("Fecha")
             OutlinedTextField(
                 value = fecha,
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.CalendarMonth, contentDescription = null)
+                        Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = customTextFieldColors()
             )
+
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = { guardar() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                )
             ) {
-                Text("Guardar rutina")
+                Text("Guardar rutina", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
